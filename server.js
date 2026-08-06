@@ -65,6 +65,7 @@ async function fetchWithRotation(serviceName, requestFunction) {
       activeKeyIndex[serviceName] = (activeKeyIndex[serviceName] + 1) % keys.length;
     }
   }
+  
   throw new Error(`Todas las claves de ${serviceName} fallaron o están saturadas.`);
 }
 
@@ -102,7 +103,9 @@ INSTRUCCIONES CRÍTICAS:
     const data = await response.json();
     res.json({ text: data.candidates[0].content.parts[0].text });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // 🔥 CAMBIO AQUÍ: Mensaje personalizado para el cliente (Gemini)
+    console.error("Error interno oculto (Guion):", error.message);
+    res.status(500).json({ error: "El asistente de texto inteligente (Gemini) está procesando demasiadas peticiones. Intenta de nuevo." });
   }
 });
 
@@ -130,7 +133,9 @@ app.post('/api/generate-audio', async (req, res) => {
     res.json({ url: `/temp/${fileName}` }); 
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // 🔥 CAMBIO AQUÍ: Mensaje Marca Blanca (Oculta a FishAudio)
+    console.error("Error interno oculto (Voces):", error.message);
+    res.status(500).json({ error: "El motor de voces profesionales está saturado temporalmente. Por favor, intenta de nuevo en unos segundos." });
   }
 });
 
