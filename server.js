@@ -80,6 +80,7 @@ app.post('/api/generate-script', async (req, res) => {
         case 'evento': sectorInstruction = "Tono: espectacular, festivo y de muy alta energía. Crea expectativa gigante."; break;
         case 'social': sectorInstruction = "Tono: elegante, cálido, invitador y muy emotivo."; break;
         case 'bebes': sectorInstruction = "Tono: infantil, muy tierno, juguetón, inocente y alegre. Finge ser un niño pequeño o un bebé hablando."; break;
+        case 'dj': sectorInstruction = "Tono: extremadamente enérgico, estilo DJ de discoteca o radio urbana. Usa frases de fiesta, anima al público al máximo y crea un ambiente de euforia total. Usa un estilo rápido y explosivo."; break;
         default: sectorInstruction = "Tono: persuasivo, profesional y muy dinámico.";
       }
 
