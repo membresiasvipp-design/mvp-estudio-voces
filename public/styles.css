@@ -104,3 +104,57 @@ textarea.limit-reached { border-color: var(--danger) !important; }
 .login-logo { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
 .error-text { color: var(--danger); font-size: 12px; font-weight: bold; }
 .hidden { display: none !important; }
+/* =========================================
+   📱 MODO CELULAR Y TABLET (RESPONSIVE)
+   ========================================= */
+@media screen and (max-width: 768px) {
+  /* Apilar los paneles uno encima del otro */
+  .panels-wrapper {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Hacer que los paneles ocupen el 100% del ancho del celular */
+  .panel-left, 
+  .panel-right {
+    width: 100%;
+    min-width: 100%;
+    padding: 15px; /* Un poco menos de espacio interno para ganar pantalla */
+  }
+
+  /* Acomodar la barra superior */
+  .top-nav {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .user-area, 
+  .user-profile {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Ajustar la caja de Login para que no se salga de la pantalla */
+  .login-box {
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+  }
+
+  /* Apilar los botones y selectores que estaban en fila */
+  .input-group-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-group-row button {
+    width: 100%; /* Botones de tamaño completo para tocarlos fácil con el dedo */
+  }
+
+  /* Ajustar el texto grande a pantallas pequeñas */
+  .panel-header h2 {
+    font-size: 1.2rem;
+  }
+}
