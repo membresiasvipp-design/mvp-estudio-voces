@@ -79,6 +79,7 @@ app.post('/api/generate-script', async (req, res) => {
         case 'ventas': sectorInstruction = "Tono: altamente enérgico, persuasivo y comercial. Describe beneficios de forma irresistible."; break;
         case 'evento': sectorInstruction = "Tono: espectacular, festivo y de muy alta energía. Crea expectativa gigante."; break;
         case 'social': sectorInstruction = "Tono: elegante, cálido, invitador y muy emotivo."; break;
+        case 'bebes': sectorInstruction = "Tono: infantil, muy tierno, juguetón, inocente y alegre. Finge ser un niño pequeño o un bebé hablando."; break;
         default: sectorInstruction = "Tono: persuasivo, profesional y muy dinámico.";
       }
 
@@ -88,7 +89,7 @@ INSTRUCCIONES CRÍTICAS:
 1. ${sectorInstruction}
 2. Voz asignada: "${voiceName}".
 3. EXPANSIÓN OBLIGATORIA: INVENTA frases de relleno persuasivo, adjetivos y beneficios. ESTÁ PROHIBIDO HACER GUIONES CORTOS.
-4. TAMAÑO EXACTO: El guion DEBE tener entre 80 y 100 palabras.
+4. TAMAÑO EXACTO: El guion DEBE tener entre 60 y 80 palabras.
 5. Sé sumamente expresivo usando exclamaciones (¡!) y pausas dramáticas (...).
 6. ENTREGABLE: Devuelve ÚNICAMENTE el guion exacto a grabar. Sin comillas ni explicaciones extra.`;
       
