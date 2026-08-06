@@ -11,7 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: "d97cd3bf9ac547d8a90a910dd416e669", name: "Voz Publicidad Chicha" },
     { id: "bf7ea28b5f734161bb8eec37b23b1fec", name: "Voz Evento" },
     { id: "abeab4f9b0594d6d85ba2c7c0f6d6051", name: "Voz Mujer Evento Social" },
-    { id: "12eaf6ffa4ae469d9431f4e43229a3e3", name: "Voz Mujer Evento Social 2" }
+    { id: "12eaf6ffa4ae469d9431f4e43229a3e3", name: "Voz Mujer Evento Social 2" },
+    { id: "e79d7a271fa94788a3f09abb4f4aa4ab", name: "Bebé Mujer 1" },
+    { id: "5af3243c2af74a0d8cddae419a5efa42", name: "Bebé" },
+    { id: "3119936075df42628af7d6dcb17f4493", name: "Animador" },
+    { id: "86f205d0942e4fb59f15a08a07d6d018", name: "Bebé Hombre" }
   ];
 
   const loginModal = document.getElementById('login-modal');
