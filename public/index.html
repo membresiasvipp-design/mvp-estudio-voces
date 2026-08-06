@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>APP VOCES PRO</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Modal de Login -->
+  <div id="login-modal" class="modal-overlay">
+    <div class="login-box">
+      <div class="login-logo">🎙️ APP VOCES PRO</div>
+      <p style="color: #9ca3af; margin-bottom: 10px;">Ingresa tus credenciales para acceder al estudio.</p>
+      <input type="text" id="login-user" placeholder="Usuario">
+      <input type="password" id="login-pass" placeholder="Contraseña">
+      <button id="btn-login" class="btn-primary-blue">Ingresar al Estudio</button>
+      <p id="login-error" class="error-text hidden"></p>
+    </div>
+  </div>
+
+  <header class="top-nav">
+    <div class="logo-area"><span class="icon-mic">🎙️</span> APP VOCES PRO</div>
+    <div class="user-area">
+      <div class="user-profile">
+        <span id="display-user" style="margin-right: 15px; font-weight: 600;">👤 Invitado</span>
+        <span class="credit-badge">Créditos: <span id="credit-counter">0</span></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <div class="panels-wrapper">
+      
+      <!-- Panel Izquierdo -->
+      <section class="panel panel-left">
+        <div class="panel-header"><h2>📝 1. REDACCIÓN CON IA</h2></div>
+        
+        <div class="form-group">
+          <label>¿A QUÉ SECTOR PERTENECE TU NEGOCIO O ANUNCIO?</label>
+          <select id="sector-select">
+            <option value="ventas">Ventas / Comercio / Productos</option>
+            <option value="politica">Campaña Política / Liderazgo</option>
+            <option value="evento">Evento Corporativo / Fiesta Masiva</option>
+            <option value="social">Evento Social (Bodas, 15 Años, Matrimonios)</option>
+          </select>
+        </div>
+        
+        <div class="form-group flex-grow">
+          <label>DATOS PARA EL ANUNCIO (Viñetas o ideas sueltas)</label>
+          <textarea id="prompt-data" placeholder="Ej: Gran apertura de Minimarket Punto 2. Tendremos pescado fresco y pollo. El peso es exacto y el precio muy justo..."></textarea>
+        </div>
+        
+        <button id="btn-write-script" class="btn-primary-blue">✨ ESCRIBIR GUION PROFESIONAL</button>
+      </section>
+
+      <!-- Panel Derecho -->
+      <section class="panel panel-right">
+        <div class="panel-header"><h2>🎙️ 2. PRODUCCIÓN Y MEZCLA</h2></div>
+        
+        <div class="form-group flex-grow relative">
+          <label>GUION FINAL A GRABAR (Edita si es necesario)</label>
+          <textarea id="final-script" placeholder="Genera un guion con la IA o escríbelo aquí..."></textarea>
+          <div class="char-counter" id="char-counter">0 / 600 max</div>
+        </div>
+        
+        <div class="form-group">
+          <label>SELECCIONA LA VOZ DEL LOCUTOR</label>
+          <div class="input-group-row">
+            <select id="voice-select"></select>
+            <button id="btn-preview-voice" class="btn-icon" title="Escuchar muestra de voz">▶️</button>
+          </div>
+        </div>
+
+        <button id="btn-generate-voice" class="btn-primary-blue" style="margin-top: 15px;">
+          ⚡ PASO 1: GENERAR VOZ ACAPELLA (Costo: 3 Créditos)
+        </button>
+
+        <!-- REPRODUCTOR INTERMEDIO -->
+        <div id="acapella-container" class="hidden" style="margin-top: 20px; padding: 20px; border: 2px dashed #4f46e5; border-radius: 12px; background: rgba(79, 70, 229, 0.05);">
+          <label style="color: #4f46e5; font-size: 14px;">✅ VOZ GENERADA (Verifica antes de mezclar):</label>
+          <audio id="acapella-player" controls class="audio-player" style="margin-top: 10px;"></audio>
+        </div>
+        
+        <hr style="border-color: var(--border-color); margin: 25px 0;">
+
+        <div class="form-group music-section">
+          <label>🎵 MÚSICA DE FONDO (Opcional)</label>
+          <div class="radio-group">
+            <div>
+              <label class="radio-label">
+                <input type="radio" name="music-source" value="gallery" checked> Pista de la Galería del Estudio
+              </label>
+              <div class="input-group-row">
+                <select id="music-gallery" class="sub-select">
+                  <option value="">❌ Sin música de fondo (Solo voz limpia)</option>
+                  <option value="./audios/alegria.mp3">👇 Alegría Comercial</option>
+                  <option value="./audios/alegria_2.mp3">👇 Alegría 2</option>
+                  <option value="./audios/cumbia_1.mp3">👇 Cumbia Popular 1</option>
+                  <option value="./audios/cumbia_2.mp3">👇 Cumbia Popular 2</option>
+                  <option value="./audios/merengue_perifoneo.mp3">👇 Merengue para Perifoneo</option>
+                  <option value="./audios/salsa_perifoneo.mp3">👇 Salsa para Perifoneo</option>
+                </select>
+                <button id="btn-preview-music-gallery" class="btn-icon" title="Escuchar pista" disabled>▶️</button>
+              </div>
+            </div>
+            <div style="margin-top: 10px;">
+              <label class="radio-label">
+                <input type="radio" name="music-source" value="upload"> Subir mi propia música (MP3/WAV)
+              </label>
+              <div class="input-group-row">
+                <input type="file" id="music-upload" accept="audio/*" disabled>
+                <button id="btn-preview-music-upload" class="btn-icon" title="Escuchar archivo subido" disabled>▶️</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-mix-audio" class="btn-primary-green" style="margin-top: 15px;" disabled>
+          🎛️ PASO 2: APLICAR MÚSICA Y MEZCLAR <span id="cost-music-display">(Costo Extra: 0 Créditos)</span>
+        </button>
+      </section>
+    </div>
+
+    <!-- Panel Inferior -->
+    <section class="history-section">
+      <div class="history-header">
+        <h3>🕒 HISTORIAL RECIENTE (Última Mezcla Final)</h3>
+      </div>
+      <div class="history-content" id="history-content">
+        <p class="empty-state" style="color: var(--text-muted); font-style: italic;">Tus audios finales aparecerán aquí.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
