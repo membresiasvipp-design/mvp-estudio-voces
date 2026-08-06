@@ -15,7 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: "e79d7a271fa94788a3f09abb4f4aa4ab", name: "Bebé Mujer 1" },
     { id: "5af3243c2af74a0d8cddae419a5efa42", name: "Bebé" },
     { id: "3119936075df42628af7d6dcb17f4493", name: "Animador" },
-    { id: "86f205d0942e4fb59f15a08a07d6d018", name: "Bebé Hombre" }
+    { id: "86f205d0942e4fb59f15a08a07d6d018", name: "Bebé Hombre" },
+    { id: "5110c264835042cfb1d8563ab60e912c", name: "DJ 1" },
+    { id: "be88245c013f44a8a6dbb35ed71c5a1f", name: "DJ 2" },
+    { id: "fdc7ac94b9a94f52911520f9131fe3be", name: "DJ 3" },
+    { id: "dff5958763e541ee9288b8bbed01064a", name: "DJ 4" },
+    { id: "95d0e4a9841e423b90c01f4c51c3cb66", name: "DJ 5" },
+    { id: "0691ad69e4bb49e6803b4fb14aed628d", name: "DJ 6" },
+    { id: "b78300e744cb455eb4f6b2ac95e97e22", name: "DJ 7" }
   ];
 
   const loginModal = document.getElementById('login-modal');
