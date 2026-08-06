@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const creditCounter = document.getElementById('credit-counter');
   const displayUser = document.getElementById('display-user');
   
+  // Variables del Aviso Legal
+  const disclaimerModal = document.getElementById('disclaimer-modal');
+  const btnAcceptDisclaimer = document.getElementById('btn-accept-disclaimer');
+  
   const sectorSelect = document.getElementById('sector-select');
   const voiceSelect = document.getElementById('voice-select');
   const finalScript = document.getElementById('final-script');
@@ -66,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     costMusicDisplay.textContent = `(Costo Extra: ${getMusicCost()} Créditos)`;
   }
 
-  // --- 🔥 NUEVA FUNCIÓN PARA DESCONTAR EN GOOGLE SHEETS 🔥 ---
   async function deductCreditsFromDB(cost) {
     try {
       await fetch(APPS_SCRIPT_URL, {
@@ -82,9 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- 🔥 REPRODUCTOR MEJORADO (Con efecto ⏳ para internet lento) 🔥 ---
   let currentPlayingBtn = null; 
   function toggleAudio(btnElement, audioUrl) {
     if (!audioUrl) return;
+
     if (currentPlayingBtn === btnElement && !currentPreviewAudio.paused) {
       currentPreviewAudio.pause();
       btnElement.textContent = '▶️'; 
@@ -94,11 +99,32 @@ document.addEventListener('DOMContentLoaded', () => {
       btnPreviewVoice.textContent = '▶️';
       btnPreviewGallery.textContent = '▶️';
       btnPreviewUpload.textContent = '▶️';
+      
       currentPreviewAudio.src = audioUrl;
-      currentPreviewAudio.play();
-      btnElement.textContent = '⏸️';
+      
+      btnElement.textContent = '⏳';
       currentPlayingBtn = btnElement; 
-      currentPreviewAudio.onended = () => { btnElement.textContent = '▶️'; currentPlayingBtn = null; };
+      
+      currentPreviewAudio.onplaying = () => {
+        if (currentPlayingBtn === btnElement) btnElement.textContent = '⏸️';
+      };
+
+      currentPreviewAudio.onwaiting = () => {
+        if (currentPlayingBtn === btnElement) btnElement.textContent = '⏳';
+      };
+
+      currentPreviewAudio.onended = () => { 
+        btnElement.textContent = '▶️'; 
+        currentPlayingBtn = null; 
+      };
+
+      currentPreviewAudio.onerror = () => {
+        btnElement.textContent = '❌';
+        currentPlayingBtn = null;
+        alert("Error: No se encontró la pista. Verifica mayúsculas y minúsculas.");
+      };
+
+      currentPreviewAudio.play().catch(e => console.warn("Cargando pista..."));
     }
   }
 
@@ -123,12 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
   radioMusicUpload.addEventListener('change', updateMusicControls);
   selectMusicGallery.addEventListener('change', updateMusicControls);
   
-  // 🔥 CORRECCIÓN: Al subir el archivo SOLO se actualizan los controles (Ya no suena solo)
   inputMusicUpload.addEventListener('change', () => {
     updateMusicControls();
   });
 
-  // 🔥 CORRECCIÓN: Agregamos el botón de preview que faltaba para la música subida manualmente
   btnPreviewUpload.addEventListener('click', () => {
     if (inputMusicUpload.files[0]) {
       toggleAudio(btnPreviewUpload, URL.createObjectURL(inputMusicUpload.files[0]));
@@ -141,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   updateMusicControls();
 
+  // --- 🔥 LOGIN Y AVISO LEGAL 🔥 ---
   btnLogin.addEventListener('click', async () => {
     const user = document.getElementById('login-user').value.trim();
     const pass = document.getElementById('login-pass').value.trim();
@@ -164,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         creditCounter.textContent = currentCredits;
         displayUser.textContent = `👤 ${user}`;
         
-        // 🔥 ACTUALIZADO PARA RENDER: Ruta relativa sin localhost
         fetch('/api/set-keys', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -172,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(e => console.warn("Aviso interno:", e));
         
         loginModal.classList.add('hidden'); 
+        disclaimerModal.classList.remove('hidden'); // 🔥 MUESTRA EL AVISO LEGAL
       } else {
         errorMsg.textContent = data.message;
         errorMsg.classList.remove('hidden');
@@ -182,6 +207,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     btnLogin.textContent = "Ingresar al Estudio";
     btnLogin.disabled = false;
+  });
+
+  // 🔥 BOTÓN PARA ACEPTAR LA RESPONSABILIDAD Y ENTRAR AL ESTUDIO
+  btnAcceptDisclaimer.addEventListener('click', () => {
+    disclaimerModal.classList.add('hidden');
   });
 
   finalScript.addEventListener('input', () => {
@@ -215,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnWriteScript.disabled = true;
 
     try {
-      // 🔥 ACTUALIZADO PARA RENDER: Ruta relativa sin localhost
       const res = await fetch('/api/generate-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -272,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
     acapellaContainer.classList.add('hidden'); 
 
     try {
-      // 🔥 ACTUALIZADO PARA RENDER: Ruta relativa sin localhost
       const res = await fetch('/api/generate-audio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -284,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Descontar en pantalla y en Google Sheets
       currentCredits -= COST_VOICE;
       creditCounter.textContent = currentCredits;
-      deductCreditsFromDB(COST_VOICE); // 🔥 Llamada a Sheets
+      deductCreditsFromDB(COST_VOICE); 
       
       generatedAcapellaUrl = data.url; 
       acapellaPlayer.src = generatedAcapellaUrl;
@@ -392,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (musicCost > 0) {
         currentCredits -= musicCost;
         creditCounter.textContent = currentCredits;
-        deductCreditsFromDB(musicCost); // 🔥 Llamada a Sheets
+        deductCreditsFromDB(musicCost); 
       }
 
       document.getElementById('history-content').innerHTML = `
