@@ -85,13 +85,20 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// 🛡️ RUTA 2: GENERAR GUION (Requiere Pase VIP)
+// 🛡️ RUTA 2: GENERAR GUION (Requiere Pase VIP y Cobra Créditos)
 app.post('/api/generate-script', async (req, res) => {
   const { promptData, voiceName, sector, token } = req.body;
+  const COST_SCRIPT = 1; // 🔥 AQUÍ DEFINES CUÁNTO CUESTA USAR LA IA 🔥
 
-  // BARRERA: Si no tiene token válido, lo bloqueamos
+  // BARRERA 1: Validar sesión
   if (!token || !activeSessions[token]) {
     return res.status(401).json({ error: "Acceso denegado. Bloqueo de seguridad activado." });
+  }
+
+  // BARRERA 2: Validar saldo en la bóveda
+  let userSession = activeSessions[token];
+  if (userSession.credits < COST_SCRIPT) {
+    return res.status(403).json({ error: "Créditos insuficientes para redactar el guion." });
   }
 
   try {
@@ -113,7 +120,7 @@ INSTRUCCIONES CRÍTICAS:
 1. ${sectorInstruction}
 2. Voz asignada: "${voiceName}".
 3. EXPANSIÓN OBLIGATORIA: INVENTA frases de relleno persuasivo, adjetivos y beneficios. ESTÁ PROHIBIDO HACER GUIONES CORTOS.
-4. TAMAÑO EXACTO: El guion DEBE tener entre 60 y 70 palabras.
+4. TAMAÑO EXACTO: El guion DEBE tener entre 80 y 100 palabras.
 5. ETIQUETAS DE EMOCIÓN (SÚPER OBLIGATORIO): Para que la voz suene humana y natural, DEBES incluir etiquetas de acción entre corchetes a lo largo del texto.
    Usa estrictamente estas etiquetas donde corresponda: [excited], [emphasis], [chuckle], [short pause], [long pause], [sigh].
    EJEMPLO DE FORMATO ESPERADO: "[excited] ¡Señoras y señores! [short pause] ¡La fiesta ya comenzó! [emphasis] ¡Quiero ver esas manos arriba bailando! [chuckle] ¡Aquí nadie se queda sentado!"
@@ -128,7 +135,18 @@ INSTRUCCIONES CRÍTICAS:
     });
     
     const data = await response.json();
-    res.json({ text: data.candidates[0].content.parts[0].text });
+
+    // 💰 COBRO SEGURO: Descontamos en la memoria del servidor
+    userSession.credits -= COST_SCRIPT;
+
+    // Avisamos a Google Sheets en segundo plano
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: "deduct", username: userSession.username, cost: COST_SCRIPT })
+    }).catch(e => console.log("Error al sincronizar guion con Sheets"));
+
+    // Devolvemos el texto generado Y los créditos restantes
+    res.json({ text: data.candidates[0].content.parts[0].text, remainingCredits: userSession.credits });
   } catch (error) {
     res.status(500).json({ error: "El asistente de texto (Gemini) está saturado. Intenta de nuevo." });
   }
