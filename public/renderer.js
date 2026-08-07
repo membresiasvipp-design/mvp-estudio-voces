@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyq3giovpe2cjbUvGlhJPXKVXh5bIoYnlFeiNxxfXDMhm_4JE_-FSYsIppXFGf9aNEyWA/exec';
 
-  // 🔥 LISTA CATEGORIZADA CON EMOJIS 🔥
   const myVoices = {
     "🎙️ LOCUTORES COMERCIALES": [
       { id: "d8825869c3ca4fd4ae08ee5fd460a98e", name: "Anunciador Político" },
@@ -52,22 +51,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLogin = document.getElementById('btn-login');
   const creditCounter = document.getElementById('credit-counter');
   const displayUser = document.getElementById('display-user');
-  
-  // Variables del Aviso Legal
   const disclaimerModal = document.getElementById('disclaimer-modal');
   const btnAcceptDisclaimer = document.getElementById('btn-accept-disclaimer');
-  
   const sectorSelect = document.getElementById('sector-select');
   const voiceSelect = document.getElementById('voice-select');
   const finalScript = document.getElementById('final-script');
   const charCounter = document.getElementById('char-counter');
-  
   const btnGenerateVoice = document.getElementById('btn-generate-voice');
   const btnMixAudio = document.getElementById('btn-mix-audio');
+  
+  // Elementos del Nuevo Reproductor Acapella
   const acapellaContainer = document.getElementById('acapella-container');
-  const acapellaPlayer = document.getElementById('acapella-player');
+  const acapellaAudioEl = document.getElementById('acapella-audio-element');
+  const acapellaPlayBtn = document.getElementById('acapella-play-btn');
+  const acapellaProgress = document.getElementById('acapella-progress');
+  const acapellaCurrent = document.getElementById('acapella-current');
+  const acapellaDuration = document.getElementById('acapella-duration');
+  
   const costMusicDisplay = document.getElementById('cost-music-display');
-
   const btnWriteScript = document.getElementById('btn-write-script');
   const btnPreviewVoice = document.getElementById('btn-preview-voice');
   const btnPreviewGallery = document.getElementById('btn-preview-music-gallery');
@@ -82,13 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const MAX_CHARS = 600;
   const COST_VOICE = 3;
   const COST_MUSIC = 5;
-  
   let currentPreviewAudio = new Audio();
   let generatedAcapellaUrl = null; 
 
-  // 🔥 ROBOT ACTUALIZADO CON SEPARADORES VISUALES 🔥
+  // Generar Menú de Voces
   voiceSelect.innerHTML = ''; 
-
   for (const [category, voices] of Object.entries(myVoices)) {
     const separator = document.createElement('option');
     separator.disabled = true;
@@ -105,9 +104,52 @@ document.addEventListener('DOMContentLoaded', () => {
       voiceSelect.appendChild(option);
     });
   }
-
-  // Seleccionamos por defecto la primera voz válida (saltando el separador)
   voiceSelect.selectedIndex = 1;
+
+  // 🔥 LÓGICA DEL NUEVO REPRODUCTOR CUSTOM 🔥
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  }
+
+  function setupCustomPlayer(audioEl, playBtn, progressBar, currentEl, durationEl) {
+    playBtn.addEventListener('click', () => {
+      if (audioEl.paused) {
+        audioEl.play();
+        playBtn.textContent = '⏸️';
+      } else {
+        audioEl.pause();
+        playBtn.textContent = '▶️';
+      }
+    });
+
+    audioEl.addEventListener('timeupdate', () => {
+      const current = audioEl.currentTime;
+      const duration = audioEl.duration || 0;
+      if (duration > 0) progressBar.value = (current / duration) * 100;
+      currentEl.textContent = formatTime(current);
+    });
+
+    audioEl.addEventListener('loadedmetadata', () => {
+      durationEl.textContent = formatTime(audioEl.duration);
+    });
+
+    progressBar.addEventListener('input', () => {
+      const duration = audioEl.duration || 0;
+      audioEl.currentTime = (progressBar.value / 100) * duration;
+    });
+
+    audioEl.addEventListener('ended', () => {
+      playBtn.textContent = '▶️';
+      progressBar.value = 0;
+      currentEl.textContent = '0:00';
+    });
+  }
+  
+  // Inicializamos el reproductor de Acapella
+  setupCustomPlayer(acapellaAudioEl, acapellaPlayBtn, acapellaProgress, acapellaCurrent, acapellaDuration);
 
   function getMusicCost() {
     let cost = 0;
@@ -124,22 +166,17 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({
-          action: "deduct",
-          username: currentUser,
-          cost: cost
-        })
+        body: JSON.stringify({ action: "deduct", username: currentUser, cost: cost })
       });
     } catch (error) {
-      console.error("Error al actualizar la base de datos:", error);
+      console.error("Error al actualizar DB:", error);
     }
   }
 
-  // --- 🔥 REPRODUCTOR MEJORADO (Con efecto ⏳ para internet lento) 🔥 ---
+  // Reproductor para Previas (Botones Laterales)
   let currentPlayingBtn = null; 
   function toggleAudio(btnElement, audioUrl) {
     if (!audioUrl) return;
-
     if (currentPlayingBtn === btnElement && !currentPreviewAudio.paused) {
       currentPreviewAudio.pause();
       btnElement.textContent = '▶️'; 
@@ -151,29 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
       btnPreviewUpload.textContent = '▶️';
       
       currentPreviewAudio.src = audioUrl;
-      
       btnElement.textContent = '⏳';
       currentPlayingBtn = btnElement; 
       
-      currentPreviewAudio.onplaying = () => {
-        if (currentPlayingBtn === btnElement) btnElement.textContent = '⏸️';
-      };
-
-      currentPreviewAudio.onwaiting = () => {
-        if (currentPlayingBtn === btnElement) btnElement.textContent = '⏳';
-      };
-
-      currentPreviewAudio.onended = () => { 
-        btnElement.textContent = '▶️'; 
-        currentPlayingBtn = null; 
-      };
-
-      currentPreviewAudio.onerror = () => {
-        btnElement.textContent = '❌';
-        currentPlayingBtn = null;
-        alert("Error: No se encontró la pista. Verifica mayúsculas y minúsculas.");
-      };
-
+      currentPreviewAudio.onplaying = () => { if (currentPlayingBtn === btnElement) btnElement.textContent = '⏸️'; };
+      currentPreviewAudio.onwaiting = () => { if (currentPlayingBtn === btnElement) btnElement.textContent = '⏳'; };
+      currentPreviewAudio.onended = () => { btnElement.textContent = '▶️'; currentPlayingBtn = null; };
+      currentPreviewAudio.onerror = () => { btnElement.textContent = '❌'; currentPlayingBtn = null; alert("Error: No se encontró la pista."); };
       currentPreviewAudio.play().catch(e => console.warn("Cargando pista..."));
     }
   }
@@ -182,15 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateMusicControls() {
     if (radioMusicGallery.checked) {
-      selectMusicGallery.disabled = false;
-      inputMusicUpload.disabled = true;
-      btnPreviewUpload.disabled = true;
-      btnPreviewGallery.disabled = selectMusicGallery.value === "";
+      selectMusicGallery.disabled = false; inputMusicUpload.disabled = true;
+      btnPreviewUpload.disabled = true; btnPreviewGallery.disabled = selectMusicGallery.value === "";
     } else {
-      selectMusicGallery.disabled = true;
-      inputMusicUpload.disabled = false;
-      btnPreviewGallery.disabled = true;
-      btnPreviewUpload.disabled = !inputMusicUpload.files[0];
+      selectMusicGallery.disabled = true; inputMusicUpload.disabled = false;
+      btnPreviewGallery.disabled = true; btnPreviewUpload.disabled = !inputMusicUpload.files[0];
     }
     updateMusicCostDisplay();
   }
@@ -198,24 +215,17 @@ document.addEventListener('DOMContentLoaded', () => {
   radioMusicGallery.addEventListener('change', updateMusicControls);
   radioMusicUpload.addEventListener('change', updateMusicControls);
   selectMusicGallery.addEventListener('change', updateMusicControls);
-  
-  inputMusicUpload.addEventListener('change', () => {
-    updateMusicControls();
-  });
+  inputMusicUpload.addEventListener('change', updateMusicControls);
 
   btnPreviewUpload.addEventListener('click', () => {
-    if (inputMusicUpload.files[0]) {
-      toggleAudio(btnPreviewUpload, URL.createObjectURL(inputMusicUpload.files[0]));
-    }
+    if (inputMusicUpload.files[0]) toggleAudio(btnPreviewUpload, URL.createObjectURL(inputMusicUpload.files[0]));
   });
 
   btnPreviewGallery.addEventListener('click', () => {
     if (selectMusicGallery.value) toggleAudio(btnPreviewGallery, selectMusicGallery.value);
   });
-  
   updateMusicControls();
 
-  // --- 🔥 LOGIN Y AVISO LEGAL 🔥 ---
   btnLogin.addEventListener('click', async () => {
     const user = document.getElementById('login-user').value.trim();
     const pass = document.getElementById('login-pass').value.trim();
@@ -228,89 +238,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const response = await fetch(APPS_SCRIPT_URL, { 
-        method: 'POST', 
-        body: JSON.stringify({ action: "login", username: user, password: pass }) 
+        method: 'POST', body: JSON.stringify({ action: "login", username: user, password: pass }) 
       });
       const data = await response.json();
 
       if (data.success) {
-        currentCredits = data.credits;
-        currentUser = user;
-        creditCounter.textContent = currentCredits;
-        displayUser.textContent = `👤 ${user}`;
-        
+        currentCredits = data.credits; currentUser = user;
+        creditCounter.textContent = currentCredits; displayUser.textContent = `👤 ${user}`;
         fetch('/api/set-keys', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data.keys)
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data.keys)
         }).catch(e => console.warn("Aviso interno:", e));
         
-        loginModal.classList.add('hidden'); 
-        disclaimerModal.classList.remove('hidden'); // 🔥 MUESTRA EL AVISO LEGAL
+        document.getElementById('login-modal').classList.add('hidden'); 
+        disclaimerModal.classList.remove('hidden'); 
       } else {
-        errorMsg.textContent = data.message;
-        errorMsg.classList.remove('hidden');
+        errorMsg.textContent = data.message; errorMsg.classList.remove('hidden');
       }
     } catch (err) {
-      errorMsg.textContent = "Error de conexión con la base de datos.";
-      errorMsg.classList.remove('hidden');
+      errorMsg.textContent = "Error de conexión con la base de datos."; errorMsg.classList.remove('hidden');
     }
-    btnLogin.textContent = "Ingresar al Estudio";
-    btnLogin.disabled = false;
+    btnLogin.textContent = "Ingresar al Estudio"; btnLogin.disabled = false;
   });
 
-  // 🔥 BOTÓN PARA ACEPTAR LA RESPONSABILIDAD Y ENTRAR AL ESTUDIO
-  btnAcceptDisclaimer.addEventListener('click', () => {
-    disclaimerModal.classList.add('hidden');
-  });
+  btnAcceptDisclaimer.addEventListener('click', () => disclaimerModal.classList.add('hidden'));
 
   finalScript.addEventListener('input', () => {
     const length = finalScript.value.length;
     charCounter.textContent = `${length} / ${MAX_CHARS} max`;
     
     acapellaContainer.classList.add('hidden');
+    acapellaAudioEl.pause();
+    acapellaPlayBtn.textContent = '▶️';
     btnMixAudio.disabled = true;
     generatedAcapellaUrl = null;
 
     if (length > MAX_CHARS) {
-      charCounter.classList.add('limit-reached');
-      finalScript.classList.add('limit-reached');
-      btnGenerateVoice.disabled = true;
-      btnGenerateVoice.textContent = "⚠️ TEXTO DEMASIADO LARGO";
+      charCounter.classList.add('limit-reached'); finalScript.classList.add('limit-reached');
+      btnGenerateVoice.disabled = true; btnGenerateVoice.textContent = "⚠️ TEXTO DEMASIADO LARGO";
     } else {
-      charCounter.classList.remove('limit-reached');
-      finalScript.classList.remove('limit-reached');
-      btnGenerateVoice.disabled = false;
-      btnGenerateVoice.innerHTML = `⚡ PASO 1: GENERAR VOZ ACAPELLA (Costo: 3 Créditos)`;
+      charCounter.classList.remove('limit-reached'); finalScript.classList.remove('limit-reached');
+      btnGenerateVoice.disabled = false; btnGenerateVoice.innerHTML = `⚡ PASO 1: GENERAR VOZ ACAPELLA (Costo: 3 Créditos)`;
     }
   });
 
   btnWriteScript.addEventListener('click', async () => {
     const promptData = document.getElementById('prompt-data').value.trim();
     if (!promptData) return alert("Ingresa datos para el anuncio.");
-    // Modificamos esto para limpiar el nombre y quitar el emoji de "👉" al enviarlo al guion
     const selectedVoiceText = voiceSelect.options[voiceSelect.selectedIndex].text.replace('👉', '').trim();
     const selectedSector = sectorSelect.value;
 
-    btnWriteScript.textContent = "⏳ Escribiendo Guion Premium...";
-    btnWriteScript.disabled = true;
+    btnWriteScript.textContent = "⏳ Escribiendo Guion Premium..."; btnWriteScript.disabled = true;
 
     try {
       const res = await fetch('/api/generate-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ promptData, voiceName: selectedVoiceText, sector: selectedSector })
       });
       const data = await res.json();
       if(data.error) throw new Error(data.error);
       
-      finalScript.value = data.text;
-      finalScript.dispatchEvent(new Event('input')); 
+      finalScript.value = data.text; finalScript.dispatchEvent(new Event('input')); 
     } catch (error) {
       alert(`Error generando guion: ${error.message}`);
     }
-    btnWriteScript.textContent = "✨ ESCRIBIR GUION PROFESIONAL";
-    btnWriteScript.disabled = false;
+    btnWriteScript.textContent = "✨ ESCRIBIR GUION PROFESIONAL"; btnWriteScript.disabled = false;
   });
 
   function audioBufferToWavUrl(buffer) {
@@ -347,43 +338,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if (text.length > MAX_CHARS) return alert("Superaste el límite de caracteres.");
     if (currentCredits < COST_VOICE) return alert("No tienes créditos suficientes para generar la voz.");
 
-    btnGenerateVoice.textContent = "⏳ GRABANDO LOCUCIÓN...";
-    btnGenerateVoice.disabled = true;
+    btnGenerateVoice.textContent = "⏳ GRABANDO LOCUCIÓN..."; btnGenerateVoice.disabled = true;
     acapellaContainer.classList.add('hidden'); 
 
     try {
       const res = await fetch('/api/generate-audio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voiceId })
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, voiceId })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      // Descontar en pantalla y en Google Sheets
-      currentCredits -= COST_VOICE;
-      creditCounter.textContent = currentCredits;
+      currentCredits -= COST_VOICE; creditCounter.textContent = currentCredits;
       deductCreditsFromDB(COST_VOICE); 
       
       generatedAcapellaUrl = data.url; 
-      acapellaPlayer.src = generatedAcapellaUrl;
+      acapellaAudioEl.src = generatedAcapellaUrl;
       
       acapellaContainer.classList.remove('hidden');
       btnMixAudio.disabled = false; 
 
     } catch (error) {
-      console.error(error);
-      alert(`⚠️ ERROR DE VOZ: ${error.message}`);
+      console.error(error); alert(`⚠️ ERROR DE VOZ: ${error.message}`);
     }
-    
-    btnGenerateVoice.innerHTML = `⚡ PASO 1: GENERAR VOZ ACAPELLA (Costo: 3 Créditos)`;
-    btnGenerateVoice.disabled = false;
+    btnGenerateVoice.innerHTML = `⚡ PASO 1: GENERAR VOZ ACAPELLA (Costo: 3 Créditos)`; btnGenerateVoice.disabled = false;
   });
 
-  // --- 🔥 VOLÚMENES CALIBRADOS (1.0 NORMAL, 0.4 FONDO) 🔥 ---
   async function mixAudios(voiceUrl, musicFile) {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
     const voiceRes = await fetch(voiceUrl);
     const voiceArrayBuffer = await voiceRes.arrayBuffer();
     const decodedVoice = await audioCtx.decodeAudioData(voiceArrayBuffer);
@@ -393,63 +374,41 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         let musicArrayBuffer;
         if (typeof musicFile === 'string') {
-          const res = await fetch(musicFile);
-          musicArrayBuffer = await res.arrayBuffer();
+          const res = await fetch(musicFile); musicArrayBuffer = await res.arrayBuffer();
         } else {
           musicArrayBuffer = await musicFile.arrayBuffer();
         }
         decodedMusic = await audioCtx.decodeAudioData(musicArrayBuffer);
       } catch (e) {
-        console.warn("Fallo en la música. Solo voz.", e);
-        decodedMusic = null;
+        console.warn("Fallo en la música. Solo voz.", e); decodedMusic = null;
       }
     }
 
     if (!decodedMusic) return voiceUrl; 
 
-    const introTime = 2.5; 
-    const fadeTime = 1.0;  
-    const outroTime = 4.0; 
-    const voiceDur = decodedVoice.duration;
-    
+    const introTime = 2.5; const fadeTime = 1.0; const outroTime = 4.0; const voiceDur = decodedVoice.duration;
     const totalDuration = introTime + voiceDur + outroTime;
     const totalLength = Math.ceil(totalDuration * decodedVoice.sampleRate);
     const offlineCtx = new OfflineAudioContext(2, totalLength, decodedVoice.sampleRate);
 
-    const voiceSource = offlineCtx.createBufferSource();
-    voiceSource.buffer = decodedVoice;
-    
-    const musicSource = offlineCtx.createBufferSource();
-    musicSource.buffer = decodedMusic;
-    musicSource.loop = true; 
+    const voiceSource = offlineCtx.createBufferSource(); voiceSource.buffer = decodedVoice;
+    const musicSource = offlineCtx.createBufferSource(); musicSource.buffer = decodedMusic; musicSource.loop = true; 
     
     const gainNode = offlineCtx.createGain();
-    
-    // Inicia con volumen normal (1.0)
-    gainNode.gain.setValueAtTime(1.0, 0); 
-    gainNode.gain.setValueAtTime(1.0, introTime - fadeTime);
-    
-    // Baja de manera sutil (0.4) para no apagarla del todo
-    gainNode.gain.linearRampToValueAtTime(0.4, introTime);
-    gainNode.gain.setValueAtTime(0.4, introTime + voiceDur);
-    
-    // Vuelve al volumen original (1.0)
-    gainNode.gain.linearRampToValueAtTime(1.0, introTime + voiceDur + fadeTime);
-    gainNode.gain.setValueAtTime(1.0, totalDuration - 2.0); 
-    
-    // Apaga suavemente al final
+    gainNode.gain.setValueAtTime(1.0, 0); gainNode.gain.setValueAtTime(1.0, introTime - fadeTime);
+    gainNode.gain.linearRampToValueAtTime(0.4, introTime); gainNode.gain.setValueAtTime(0.4, introTime + voiceDur);
+    gainNode.gain.linearRampToValueAtTime(1.0, introTime + voiceDur + fadeTime); gainNode.gain.setValueAtTime(1.0, totalDuration - 2.0); 
     gainNode.gain.linearRampToValueAtTime(0.001, totalDuration); 
 
-    voiceSource.connect(offlineCtx.destination);
-    musicSource.connect(gainNode);
-    gainNode.connect(offlineCtx.destination);
-
-    musicSource.start(0); 
-    voiceSource.start(introTime); 
+    voiceSource.connect(offlineCtx.destination); musicSource.connect(gainNode); gainNode.connect(offlineCtx.destination);
+    musicSource.start(0); voiceSource.start(introTime); 
 
     const renderedBuffer = await offlineCtx.startRendering();
     return audioBufferToWavUrl(renderedBuffer);
   }
+
+  // Generador de ID único para múltiples reproductores en el historial
+  let historyCount = 0;
 
   btnMixAudio.addEventListener('click', async () => {
     if (!generatedAcapellaUrl) return alert("Primero debes generar la voz en el Paso 1.");
@@ -457,8 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicCost = getMusicCost();
     if (currentCredits < musicCost) return alert("Créditos insuficientes para la música de fondo.");
 
-    btnMixAudio.textContent = "🎛️ PROCESANDO MEZCLA FINAL...";
-    btnMixAudio.disabled = true;
+    btnMixAudio.textContent = "🎛️ PROCESANDO MEZCLA FINAL..."; btnMixAudio.disabled = true;
 
     try {
       let musicFile = null;
@@ -467,28 +425,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const finalAudioUrl = await mixAudios(generatedAcapellaUrl, musicFile);
 
-      // Descontar en pantalla y en Google Sheets
       if (musicCost > 0) {
-        currentCredits -= musicCost;
-        creditCounter.textContent = currentCredits;
+        currentCredits -= musicCost; creditCounter.textContent = currentCredits;
         deductCreditsFromDB(musicCost); 
       }
       
       const cleanVoiceName = voiceSelect.options[voiceSelect.selectedIndex].text.replace('👉', '').trim();
+      
+      historyCount++;
+      const uniqueId = `hist-${historyCount}`;
 
-      document.getElementById('history-content').innerHTML = `
-        <div style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
-          <strong style="color: #4f46e5;">🎙️ Voz:</strong> ${cleanVoiceName} <br>
-          <strong style="color: #10b981;">🎵 Música:</strong> ${musicFile ? 'Incluida' : 'Ninguna (Audio Limpio)'} <br>
-          <strong style="color: #9ca3af;">📝 Guion:</strong> <em>"${finalScript.value.substring(0, 80)}..."</em>
+      const historyHtml = `
+        <div class="history-item glow-box" style="margin-bottom: 20px;">
+          <div style="margin-bottom: 15px; font-size: 14px; line-height: 1.6;">
+            <strong style="color: #6366f1;">🎙️ Voz:</strong> ${cleanVoiceName} <br>
+            <strong style="color: #10b981;">🎵 Música:</strong> ${musicFile ? 'Incluida' : 'Ninguna (Audio Limpio)'} <br>
+            <strong style="color: #94a3b8;">📝 Guion:</strong> <em style="color:#e2e8f0;">"${finalScript.value.substring(0, 80)}..."</em>
+          </div>
+          
+          <div class="custom-player" style="margin-bottom: 15px;">
+            <button class="player-btn" id="play-${uniqueId}">▶️</button>
+            <div class="player-timeline">
+              <input type="range" id="prog-${uniqueId}" class="player-slider" value="0" min="0" max="100" step="1">
+              <div class="player-time">
+                <span id="curr-${uniqueId}">0:00</span> / <span id="dur-${uniqueId}">0:00</span>
+              </div>
+            </div>
+          </div>
+          <audio id="audio-${uniqueId}" src="${finalAudioUrl}"></audio>
+
+          <a href="${finalAudioUrl}" download="cuna_comercial_final.wav" style="display:inline-block; width: 100%; text-align: center; color:#10b981; text-decoration:none; font-weight:900; font-size: 14px; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3); transition: 0.3s; text-transform: uppercase;">⬇️ Descargar Mezcla Final (.WAV)</a>
         </div>
-        <audio controls class="audio-player" src="${finalAudioUrl}"></audio>
-        <a href="${finalAudioUrl}" download="cuna_comercial_final.wav" style="display:inline-block; margin-top:15px; color:#10b981; text-decoration:none; font-weight:800; font-size: 15px; background: rgba(16, 185, 129, 0.1); padding: 10px 20px; border-radius: 8px; border: 1px solid #10b981;">⬇️ Descargar Mezcla Final (.WAV)</a>
       `;
 
+      // Si es el primer elemento, borramos el mensaje de "vacío"
+      const historyContainer = document.getElementById('history-content');
+      if(historyCount === 1) historyContainer.innerHTML = '';
+      
+      // Insertamos el nuevo HTML al principio (para que el más reciente quede arriba)
+      historyContainer.insertAdjacentHTML('afterbegin', historyHtml);
+
+      // Conectamos el nuevo reproductor a nuestro sistema inteligente
+      const newAudioEl = document.getElementById(`audio-${uniqueId}`);
+      const newPlayBtn = document.getElementById(`play-${uniqueId}`);
+      const newProgress = document.getElementById(`prog-${uniqueId}`);
+      const newCurrent = document.getElementById(`curr-${uniqueId}`);
+      const newDuration = document.getElementById(`dur-${uniqueId}`);
+      setupCustomPlayer(newAudioEl, newPlayBtn, newProgress, newCurrent, newDuration);
+
     } catch (error) {
-      console.error(error);
-      alert(`⚠️ ERROR EN MEZCLA: ${error.message}`);
+      console.error(error); alert(`⚠️ ERROR EN MEZCLA: ${error.message}`);
     }
     
     updateMusicCostDisplay();
