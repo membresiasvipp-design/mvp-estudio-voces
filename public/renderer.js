@@ -22,7 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: "dff5958763e541ee9288b8bbed01064a", name: "DJ 4" },
     { id: "95d0e4a9841e423b90c01f4c51c3cb66", name: "DJ 5" },
     { id: "0691ad69e4bb49e6803b4fb14aed628d", name: "DJ 6" },
-    { id: "b78300e744cb455eb4f6b2ac95e97e22", name: "DJ 7" }
+    { id: "b78300e744cb455eb4f6b2ac95e97e22", name: "DJ 7" },
+    { id: "c079a8df558c43eb997b70368fdb18fb", name: "Animador Bella Luz" },
+    { id: "bc93fd919a214c2eae9fe16492a47489", name: "Mujer Paisa" },
+    { id: "e296306da5d449999f6e35c2b9f60aea", name: "Mujer Colombiana" },
+    { id: "35199d5438854f5d9157c500479ab684", name: "Narrador" },
+    { id: "852cb30e8c92488e94a6125573403ff3", name: "Spot Mujer" },
+    { id: "3468323155ba4c94a1ebc52f6e8947da", name: "Spot Mujer 2" },
+    { id: "94ec15a8b97d4e66948be32780c8314d", name: "Spot Dj Varón" },
+    { id: "5d201ef6c3d844fb84956745b311ab9a", name: "Spot Radio Mujer" },
+    { id: "2153dc77d28e4de986ecb87489695723", name: "Spot Radio Varón" },
+    { id: "29e182e38d6742d6a5b2ee21901c9fb3", name: "Spot Radio Varón 2" },
+    { id: "14196dde8a13465e9b7b8f869fc3c21d", name: "Spot Radio Mujer 2" },
+    { id: "bc55e1d5054142e9845be113c2877615", name: "Spot Radio Varón - Cuña" }
   ];
 
   const loginModal = document.getElementById('login-modal');
