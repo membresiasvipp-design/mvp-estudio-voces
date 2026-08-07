@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyq3giovpe2cjbUvGlhJPXKVXh5bIoYnlFeiNxxfXDMhm_4JE_-FSYsIppXFGf9aNEyWA/exec';
 
-  // 🔥 NUEVA LISTA CATEGORIZADA 🔥
+  // 🔥 LISTA CATEGORIZADA CON EMOJIS 🔥
   const myVoices = {
-    "Locutores Comerciales": [
+    "🎙️ LOCUTORES COMERCIALES": [
       { id: "d8825869c3ca4fd4ae08ee5fd460a98e", name: "Anunciador Político" },
       { id: "cd85a7b00f984147a594713d16c711a2", name: "Narrador Político" },
       { id: "ecdb5ee920b745d69893db07702e1121", name: "Vendedor 1" },
@@ -13,14 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: "d97cd3bf9ac547d8a90a910dd416e669", name: "Voz Publicidad Chicha" },
       { id: "35199d5438854f5d9157c500479ab684", name: "Narrador" }
     ],
-    "Animación y Eventos": [
+    "🎉 ANIMACIÓN Y EVENTOS": [
       { id: "bf7ea28b5f734161bb8eec37b23b1fec", name: "Voz Evento" },
       { id: "abeab4f9b0594d6d85ba2c7c0f6d6051", name: "Voz Mujer Evento Social" },
       { id: "12eaf6ffa4ae469d9431f4e43229a3e3", name: "Voz Mujer Evento Social 2" },
       { id: "3119936075df42628af7d6dcb17f4493", name: "Animador" },
       { id: "c079a8df558c43eb997b70368fdb18fb", name: "Animador Bella Luz" }
     ],
-    "DJs y Radio": [
+    "🎧 DJs Y RADIO": [
       { id: "5110c264835042cfb1d8563ab60e912c", name: "DJ 1" },
       { id: "be88245c013f44a8a6dbb35ed71c5a1f", name: "DJ 2" },
       { id: "fdc7ac94b9a94f52911520f9131fe3be", name: "DJ 3" },
@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: "14196dde8a13465e9b7b8f869fc3c21d", name: "Spot Radio Mujer 2" },
       { id: "bc55e1d5054142e9845be113c2877615", name: "Spot Radio Varón - Cuña" }
     ],
-    "Voces Femeninas Específicas": [
+    "👩 VOCES FEMENINAS": [
       { id: "bc93fd919a214c2eae9fe16492a47489", name: "Mujer Paisa" },
       { id: "e296306da5d449999f6e35c2b9f60aea", name: "Mujer Colombiana" },
       { id: "852cb30e8c92488e94a6125573403ff3", name: "Spot Mujer" },
       { id: "3468323155ba4c94a1ebc52f6e8947da", name: "Spot Mujer 2" }
     ],
-    "Voces Infantiles": [
+    "🍼 VOCES INFANTILES": [
       { id: "e79d7a271fa94788a3f09abb4f4aa4ab", name: "Bebé Mujer 1" },
       { id: "5af3243c2af74a0d8cddae419a5efa42", name: "Bebé" },
       { id: "86f205d0942e4fb59f15a08a07d6d018", name: "Bebé Hombre" }
@@ -86,20 +86,28 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentPreviewAudio = new Audio();
   let generatedAcapellaUrl = null; 
 
-// 🔥 ROBOT ACTUALIZADO PARA CREAR GRUPOS 🔥
+  // 🔥 ROBOT ACTUALIZADO CON SEPARADORES VISUALES 🔥
+  voiceSelect.innerHTML = ''; 
+
   for (const [category, voices] of Object.entries(myVoices)) {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = category; // Nombre del grupo
+    const separator = document.createElement('option');
+    separator.disabled = true;
+    separator.textContent = `─── ${category} ───`;
+    separator.style.color = "#818cf8"; 
+    separator.style.fontWeight = "bold";
+    separator.style.textAlign = "center";
+    voiceSelect.appendChild(separator);
     
     voices.forEach(voice => {
       const option = document.createElement('option');
       option.value = voice.id;
-      option.textContent = voice.name;
-      optgroup.appendChild(option);
+      option.textContent = `   👉 ${voice.name}`; 
+      voiceSelect.appendChild(option);
     });
-    
-    voiceSelect.appendChild(optgroup);
   }
+
+  // Seleccionamos por defecto la primera voz válida (saltando el separador)
+  voiceSelect.selectedIndex = 1;
 
   function getMusicCost() {
     let cost = 0;
@@ -280,7 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
   btnWriteScript.addEventListener('click', async () => {
     const promptData = document.getElementById('prompt-data').value.trim();
     if (!promptData) return alert("Ingresa datos para el anuncio.");
-    const selectedVoiceName = voiceSelect.options[voiceSelect.selectedIndex].text;
+    // Modificamos esto para limpiar el nombre y quitar el emoji de "👉" al enviarlo al guion
+    const selectedVoiceText = voiceSelect.options[voiceSelect.selectedIndex].text.replace('👉', '').trim();
     const selectedSector = sectorSelect.value;
 
     btnWriteScript.textContent = "⏳ Escribiendo Guion Premium...";
@@ -290,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/generate-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ promptData, voiceName: selectedVoiceName, sector: selectedSector })
+        body: JSON.stringify({ promptData, voiceName: selectedVoiceText, sector: selectedSector })
       });
       const data = await res.json();
       if(data.error) throw new Error(data.error);
@@ -464,10 +473,12 @@ document.addEventListener('DOMContentLoaded', () => {
         creditCounter.textContent = currentCredits;
         deductCreditsFromDB(musicCost); 
       }
+      
+      const cleanVoiceName = voiceSelect.options[voiceSelect.selectedIndex].text.replace('👉', '').trim();
 
       document.getElementById('history-content').innerHTML = `
         <div style="margin-bottom: 12px; font-size: 14px; line-height: 1.5;">
-          <strong style="color: #4f46e5;">🎙️ Voz:</strong> ${voiceSelect.options[voiceSelect.selectedIndex].text} <br>
+          <strong style="color: #4f46e5;">🎙️ Voz:</strong> ${cleanVoiceName} <br>
           <strong style="color: #10b981;">🎵 Música:</strong> ${musicFile ? 'Incluida' : 'Ninguna (Audio Limpio)'} <br>
           <strong style="color: #9ca3af;">📝 Guion:</strong> <em>"${finalScript.value.substring(0, 80)}..."</em>
         </div>
