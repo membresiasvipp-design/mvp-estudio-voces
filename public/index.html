@@ -3,43 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APP VOCES PRO</title>
+  <title>APP VOCES PRO | Estudio Premium</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- Modal de Login -->
   <div id="login-modal" class="modal-overlay">
-    <div class="login-box">
+    <div class="login-box glow-box">
       <div class="login-logo">🎙️ APP VOCES PRO</div>
-      <p style="color: #9ca3af; margin-bottom: 10px;">Ingresa tus credenciales para acceder al estudio.</p>
+      <p style="color: #9ca3af; margin-bottom: 10px; font-size: 14px;">Ingresa tus credenciales para acceder al estudio.</p>
       <input type="text" id="login-user" placeholder="Usuario">
       <input type="password" id="login-pass" placeholder="Contraseña">
       <button id="btn-login" class="btn-primary-blue">Ingresar al Estudio</button>
       <p id="login-error" class="error-text hidden"></p>
     </div>
   </div>
-  <!-- Modal de Aviso Legal (Deslinde de Responsabilidad) -->
+
+  <!-- Modal de Aviso Legal -->
   <div id="disclaimer-modal" class="modal-overlay hidden">
-    <div class="login-box" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
+    <div class="login-box glow-box" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
       <div class="login-logo" style="color: #ef4444; font-size: 22px;">⚠️ AVISO LEGAL</div>
-      
       <p style="color: #d1d5db; font-size: 14px; text-align: justify; margin-bottom: 12px; line-height: 1.6;">
         Las voces utilizadas en esta herramienta son extraídas de una <strong>base pública</strong> y preexistente en internet. <strong>El propietario de esta web no ha clonado, creado ni es dueño de estas voces.</strong>
       </p>
-
-      <p style="color: #facc15; font-size: 14px; text-align: justify; margin-bottom: 12px; line-height: 1.6; background: rgba(250, 204, 21, 0.1); padding: 10px; border-radius: 8px; border: 1px solid #facc15;">
-        <strong>PROTOTIPO SIN FINES COMERCIALES:</strong> Esta plataforma es estrictamente un <strong>prototipo de prueba (Beta)</strong>. No contamos con autorización, licencias ni derechos para el uso comercial o lucrativo de los audios generados. Deslindamos cualquier responsabilidad por infracciones de derechos de autor.
+      <p style="color: #facc15; font-size: 14px; text-align: justify; margin-bottom: 12px; line-height: 1.6; background: rgba(250, 204, 21, 0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(250, 204, 21, 0.3);">
+        <strong>PROTOTIPO SIN FINES COMERCIALES:</strong> Esta plataforma es estrictamente un <strong>prototipo de prueba (Beta)</strong>. No contamos con autorización, licencias ni derechos para el uso comercial o lucrativo de los audios generados. Deslindamos cualquier responsabilidad.
       </p>
-      
       <p style="color: #d1d5db; font-size: 14px; text-align: justify; margin-bottom: 12px; line-height: 1.6;">
-        <strong>NO nos hacemos responsables</strong> por el mal uso que terceros o delincuentes puedan darle a los audios generados (ej. extorsiones, estafas, suplantación de identidad). Deslindamos categóricamente cualquier responsabilidad legal o moral por malas prácticas.
+        <strong>NO nos hacemos responsables</strong> por el mal uso que terceros puedan darle a los audios generados. Deslindamos categóricamente cualquier responsabilidad legal o moral por malas prácticas.
       </p>
-      
       <p style="color: #ef4444; font-size: 14px; text-align: center; font-weight: bold; margin-bottom: 20px;">
-        Al continuar, aceptas que la explotación comercial y CUALQUIER MAL USO es bajo tu estricta y única responsabilidad.
+        Al continuar, aceptas que CUALQUIER MAL USO es bajo tu estricta y única responsabilidad.
       </p>
-      
-      <button id="btn-accept-disclaimer" class="btn-primary-blue" style="background-color: #ef4444; flex-shrink: 0;">Acepto la Responsabilidad</button>
+      <button id="btn-accept-disclaimer" class="btn-primary-blue" style="background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">Acepto la Responsabilidad</button>
     </div>
   </div>
 
@@ -47,7 +43,7 @@
     <div class="logo-area"><span class="icon-mic">🎙️</span> APP VOCES PRO</div>
     <div class="user-area">
       <div class="user-profile">
-        <span id="display-user" style="margin-right: 15px; font-weight: 600;">👤 Invitado</span>
+        <span id="display-user" style="margin-right: 15px; font-weight: 600; color: #e2e8f0;">👤 Invitado</span>
         <span class="credit-badge">Créditos: <span id="credit-counter">0</span></span>
       </div>
     </div>
@@ -57,103 +53,117 @@
     <div class="panels-wrapper">
       
       <!-- Panel Izquierdo -->
-      <section class="panel panel-left">
-        <div class="panel-header"><h2>📝 1. REDACCIÓN CON IA</h2></div>
+      <section class="panel panel-left glow-box">
+        <div class="panel-header"><h2><span class="header-icon">📝</span> 1. REDACCIÓN CON IA</h2></div>
         
-        <div class="form-group">
-          <label>¿A QUÉ SECTOR PERTENECE TU NEGOCIO O ANUNCIO?</label>
-          <select id="sector-select">
-            <option value="ventas">🛍️ Ventas y Comercio</option>
-            <option value="politica">🏛️ Campaña Política</option>
-            <option value="evento">🎉 Eventos y Fiestas</option>
-            <option value="social">❤️ Social / Emotivo</option>
-            <option value="bebes">🍼 Infantil / Bebés</option>
-            <option value="dj">🎧 DJ / Discoteca / Radio</option>
-          </select>
-        
-        <div class="form-group flex-grow">
-          <label>DATOS PARA EL ANUNCIO (Viñetas o ideas sueltas)</label>
-          <textarea id="prompt-data" placeholder="Ej: Gran apertura de Minimarket Punto 2. Tendremos pescado fresco y pollo. El peso es exacto y el precio muy justo..."></textarea>
+        <div class="panel-content">
+          <div class="form-group">
+            <label>¿A QUÉ SECTOR PERTENECE TU NEGOCIO O ANUNCIO?</label>
+            <select id="sector-select">
+              <option value="ventas">🛍️ Ventas y Comercio</option>
+              <option value="politica">🏛️ Campaña Política</option>
+              <option value="evento">🎉 Eventos y Fiestas</option>
+              <option value="social">❤️ Social / Emotivo</option>
+              <option value="bebes">🍼 Infantil / Bebés</option>
+              <option value="dj">🎧 DJ / Discoteca / Radio</option>
+            </select>
+          </div>
+          
+          <div class="form-group flex-grow">
+            <label>DATOS PARA EL ANUNCIO (Viñetas o ideas sueltas)</label>
+            <textarea id="prompt-data" placeholder="Ej: Gran apertura de Minimarket Punto 2. Tendremos pescado fresco y pollo..."></textarea>
+          </div>
+          
+          <button id="btn-write-script" class="btn-primary-blue">✨ ESCRIBIR GUION PROFESIONAL</button>
         </div>
-        
-        <button id="btn-write-script" class="btn-primary-blue">✨ ESCRIBIR GUION PROFESIONAL</button>
       </section>
 
       <!-- Panel Derecho -->
-      <section class="panel panel-right">
-        <div class="panel-header"><h2>🎙️ 2. PRODUCCIÓN Y MEZCLA</h2></div>
+      <section class="panel panel-right glow-box">
+        <div class="panel-header"><h2><span class="header-icon">🎙️</span> 2. PRODUCCIÓN Y MEZCLA</h2></div>
         
-        <div class="form-group flex-grow relative">
-          <label>GUION FINAL A GRABAR (Edita si es necesario)</label>
-          <textarea id="final-script" placeholder="Genera un guion con la IA o escríbelo aquí..."></textarea>
-          <div class="char-counter" id="char-counter">0 / 600 max</div>
-        </div>
-        
-        <div class="form-group">
-          <label>SELECCIONA LA VOZ DEL LOCUTOR</label>
-          <div class="input-group-row">
-            <select id="voice-select"></select>
-            <button id="btn-preview-voice" class="btn-icon" title="Escuchar muestra de voz">▶️</button>
+        <div class="panel-content">
+          <div class="form-group flex-grow relative">
+            <label>GUION FINAL A GRABAR (Edita si es necesario)</label>
+            <textarea id="final-script" placeholder="Genera un guion con la IA o escríbelo aquí..."></textarea>
+            <div class="char-counter" id="char-counter">0 / 600 max</div>
           </div>
-        </div>
-
-        <button id="btn-generate-voice" class="btn-primary-blue" style="margin-top: 15px;">
-          ⚡ PASO 1: GENERAR VOZ ACAPELLA (Costo: 3 Créditos)
-        </button>
-
-        <!-- REPRODUCTOR INTERMEDIO -->
-        <div id="acapella-container" class="hidden" style="margin-top: 20px; padding: 20px; border: 2px dashed #4f46e5; border-radius: 12px; background: rgba(79, 70, 229, 0.05);">
-          <label style="color: #4f46e5; font-size: 14px;">✅ VOZ GENERADA (Verifica antes de mezclar):</label>
-          <audio id="acapella-player" controls class="audio-player" style="margin-top: 10px;"></audio>
-        </div>
-        
-        <hr style="border-color: var(--border-color); margin: 25px 0;">
-
-        <div class="form-group music-section">
-          <label>🎵 MÚSICA DE FONDO (Opcional)</label>
-          <div class="radio-group">
-            <div>
-              <label class="radio-label">
-                <input type="radio" name="music-source" value="gallery" checked> Pista de la Galería del Estudio
-              </label>
-              <div class="input-group-row">
-                <select id="music-gallery" class="sub-select">
-                  <option value="">❌ Sin música de fondo (Solo voz limpia)</option>
-                  <option value="./audios/Alegria.mp3">👇 Alegría Comercial</option>
-                  <option value="./audios/Alegria_2.mp3">👇 Alegría 2</option>
-                  <option value="./audios/Cumbia_1.mp3">👇 Cumbia Popular 1</option>
-                  <option value="./audios/Cumbia_2.mp3">👇 Cumbia Popular 2</option>
-                  <option value="./audios/Merengue_Perifoneo.mp3">👇 Merengue para Perifoneo</option>
-                  <option value="./audios/Salsa_Perifoneo.mp3">👇 Salsa para Perifoneo</option>
-                </select>
-                <button id="btn-preview-music-gallery" class="btn-icon" title="Escuchar pista" disabled>▶️</button>
-              </div>
-            </div>
-            <div style="margin-top: 10px;">
-              <label class="radio-label">
-                <input type="radio" name="music-source" value="upload"> Subir mi propia música (MP3/WAV)
-              </label>
-              <div class="input-group-row">
-                <input type="file" id="music-upload" accept="audio/*" disabled>
-                <button id="btn-preview-music-upload" class="btn-icon" title="Escuchar archivo subido" disabled>▶️</button>
-              </div>
+          
+          <div class="form-group">
+            <label>SELECCIONA LA VOZ DEL LOCUTOR</label>
+            <div class="input-group-row">
+              <select id="voice-select"></select>
+              <button id="btn-preview-voice" class="btn-icon" title="Escuchar muestra de voz">▶️</button>
             </div>
           </div>
-        </div>
 
-        <button id="btn-mix-audio" class="btn-primary-green" style="margin-top: 15px;" disabled>
-          🎛️ PASO 2: APLICAR MÚSICA Y MEZCLAR <span id="cost-music-display">(Costo Extra: 0 Créditos)</span>
-        </button>
+          <button id="btn-generate-voice" class="btn-primary-blue">
+            ⚡ PASO 1: GENERAR VOZ ACAPELLA (Costo: 3 Créditos)
+          </button>
+
+          <!-- NUEVO REPRODUCTOR ACAPELLA PREMIUM -->
+          <div id="acapella-container" class="hidden acapella-box">
+            <label style="color: #818cf8; font-size: 12px; display: block; margin-bottom: 12px;">✅ VOZ GENERADA (Verifica antes de mezclar):</label>
+            <div class="custom-player">
+              <button class="player-btn" id="acapella-play-btn">▶️</button>
+              <div class="player-timeline">
+                <input type="range" id="acapella-progress" class="player-slider" value="0" min="0" max="100" step="1">
+                <div class="player-time">
+                  <span id="acapella-current">0:00</span> / <span id="acapella-duration">0:00</span>
+                </div>
+              </div>
+            </div>
+            <audio id="acapella-audio-element" src=""></audio>
+          </div>
+          
+          <div class="divider"></div>
+
+          <div class="form-group music-section">
+            <label>🎵 MÚSICA DE FONDO (Opcional)</label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <label class="radio-label">
+                  <input type="radio" name="music-source" value="gallery" checked> Pista de la Galería del Estudio
+                </label>
+                <div class="input-group-row">
+                  <select id="music-gallery" class="sub-select">
+                    <option value="">❌ Sin música de fondo (Solo voz limpia)</option>
+                    <option value="./audios/Alegria.mp3">👇 Alegría Comercial</option>
+                    <option value="./audios/Alegria_2.mp3">👇 Alegría 2</option>
+                    <option value="./audios/Cumbia_1.mp3">👇 Cumbia Popular 1</option>
+                    <option value="./audios/Cumbia_2.mp3">👇 Cumbia Popular 2</option>
+                    <option value="./audios/Merengue_Perifoneo.mp3">👇 Merengue para Perifoneo</option>
+                    <option value="./audios/Salsa_Perifoneo.mp3">👇 Salsa para Perifoneo</option>
+                  </select>
+                  <button id="btn-preview-music-gallery" class="btn-icon" title="Escuchar pista" disabled>▶️</button>
+                </div>
+              </div>
+              <div class="radio-option" style="margin-top: 15px;">
+                <label class="radio-label">
+                  <input type="radio" name="music-source" value="upload"> Subir mi propia música (MP3/WAV)
+                </label>
+                <div class="input-group-row">
+                  <input type="file" id="music-upload" accept="audio/*" disabled>
+                  <button id="btn-preview-music-upload" class="btn-icon" title="Escuchar archivo subido" disabled>▶️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-mix-audio" class="btn-primary-green" disabled>
+            🎛️ PASO 2: APLICAR MÚSICA Y MEZCLAR <span id="cost-music-display">(Costo Extra: 0 Créditos)</span>
+          </button>
+        </div>
       </section>
     </div>
 
     <!-- Panel Inferior -->
-    <section class="history-section">
+    <section class="history-section glow-box">
       <div class="history-header">
         <h3>🕒 HISTORIAL RECIENTE (Última Mezcla Final)</h3>
       </div>
       <div class="history-content" id="history-content">
-        <p class="empty-state" style="color: var(--text-muted); font-style: italic;">Tus audios finales aparecerán aquí.</p>
+        <p class="empty-state" style="color: var(--text-muted); font-style: italic; text-align: center; padding: 20px 0;">Tus audios finales aparecerán aquí.</p>
       </div>
     </section>
   </div>
