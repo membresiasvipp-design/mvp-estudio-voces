@@ -86,12 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentPreviewAudio = new Audio();
   let generatedAcapellaUrl = null; 
 
-  myVoices.forEach(voice => {
-    const option = document.createElement('option');
-    option.value = voice.id;
-    option.textContent = voice.name;
-    voiceSelect.appendChild(option);
-  });
+// 🔥 ROBOT ACTUALIZADO PARA CREAR GRUPOS 🔥
+  for (const [category, voices] of Object.entries(myVoices)) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = category; // Nombre del grupo
+    
+    voices.forEach(voice => {
+      const option = document.createElement('option');
+      option.value = voice.id;
+      option.textContent = voice.name;
+      optgroup.appendChild(option);
+    });
+    
+    voiceSelect.appendChild(optgroup);
+  }
 
   function getMusicCost() {
     let cost = 0;
