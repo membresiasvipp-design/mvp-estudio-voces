@@ -113,7 +113,7 @@ INSTRUCCIONES CRÍTICAS:
 1. ${sectorInstruction}
 2. Voz asignada: "${voiceName}".
 3. EXPANSIÓN OBLIGATORIA: INVENTA frases de relleno persuasivo, adjetivos y beneficios. ESTÁ PROHIBIDO HACER GUIONES CORTOS.
-4. TAMAÑO EXACTO: El guion DEBE tener entre 80 y 100 palabras.
+4. TAMAÑO EXACTO: El guion DEBE tener entre 60 y 70 palabras.
 5. ETIQUETAS DE EMOCIÓN (SÚPER OBLIGATORIO): Para que la voz suene humana y natural, DEBES incluir etiquetas de acción entre corchetes a lo largo del texto.
    Usa estrictamente estas etiquetas donde corresponda: [excited], [emphasis], [chuckle], [short pause], [long pause], [sigh].
    EJEMPLO DE FORMATO ESPERADO: "[excited] ¡Señoras y señores! [short pause] ¡La fiesta ya comenzó! [emphasis] ¡Quiero ver esas manos arriba bailando! [chuckle] ¡Aquí nadie se queda sentado!"
