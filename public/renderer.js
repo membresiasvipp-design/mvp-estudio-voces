@@ -1,41 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyq3giovpe2cjbUvGlhJPXKVXh5bIoYnlFeiNxxfXDMhm_4JE_-FSYsIppXFGf9aNEyWA/exec';
 
-  const myVoices = [
-    { id: "d8825869c3ca4fd4ae08ee5fd460a98e", name: "Anunciador Político" },
-    { id: "cd85a7b00f984147a594713d16c711a2", name: "Narrador Político" },
-    { id: "ecdb5ee920b745d69893db07702e1121", name: "Vendedor 1" },
-    { id: "3a0a149a73404ee49bef125dfff2a9c2", name: "Vendedor 2" },
-    { id: "3c36518138f44abca0006ac477aae182", name: "Vendedor 3" },
-    { id: "a3e971a0b8e548c9928308e2ff14af29", name: "Vendedor 4" },
-    { id: "d97cd3bf9ac547d8a90a910dd416e669", name: "Voz Publicidad Chicha" },
-    { id: "bf7ea28b5f734161bb8eec37b23b1fec", name: "Voz Evento" },
-    { id: "abeab4f9b0594d6d85ba2c7c0f6d6051", name: "Voz Mujer Evento Social" },
-    { id: "12eaf6ffa4ae469d9431f4e43229a3e3", name: "Voz Mujer Evento Social 2" },
-    { id: "e79d7a271fa94788a3f09abb4f4aa4ab", name: "Bebé Mujer 1" },
-    { id: "5af3243c2af74a0d8cddae419a5efa42", name: "Bebé" },
-    { id: "3119936075df42628af7d6dcb17f4493", name: "Animador" },
-    { id: "86f205d0942e4fb59f15a08a07d6d018", name: "Bebé Hombre" },
-    { id: "5110c264835042cfb1d8563ab60e912c", name: "DJ 1" },
-    { id: "be88245c013f44a8a6dbb35ed71c5a1f", name: "DJ 2" },
-    { id: "fdc7ac94b9a94f52911520f9131fe3be", name: "DJ 3" },
-    { id: "dff5958763e541ee9288b8bbed01064a", name: "DJ 4" },
-    { id: "95d0e4a9841e423b90c01f4c51c3cb66", name: "DJ 5" },
-    { id: "0691ad69e4bb49e6803b4fb14aed628d", name: "DJ 6" },
-    { id: "b78300e744cb455eb4f6b2ac95e97e22", name: "DJ 7" },
-    { id: "c079a8df558c43eb997b70368fdb18fb", name: "Animador Bella Luz" },
-    { id: "bc93fd919a214c2eae9fe16492a47489", name: "Mujer Paisa" },
-    { id: "e296306da5d449999f6e35c2b9f60aea", name: "Mujer Colombiana" },
-    { id: "35199d5438854f5d9157c500479ab684", name: "Narrador" },
-    { id: "852cb30e8c92488e94a6125573403ff3", name: "Spot Mujer" },
-    { id: "3468323155ba4c94a1ebc52f6e8947da", name: "Spot Mujer 2" },
-    { id: "94ec15a8b97d4e66948be32780c8314d", name: "Spot Dj Varón" },
-    { id: "5d201ef6c3d844fb84956745b311ab9a", name: "Spot Radio Mujer" },
-    { id: "2153dc77d28e4de986ecb87489695723", name: "Spot Radio Varón" },
-    { id: "29e182e38d6742d6a5b2ee21901c9fb3", name: "Spot Radio Varón 2" },
-    { id: "14196dde8a13465e9b7b8f869fc3c21d", name: "Spot Radio Mujer 2" },
-    { id: "bc55e1d5054142e9845be113c2877615", name: "Spot Radio Varón - Cuña" }
-  ];
+  // 🔥 NUEVA LISTA CATEGORIZADA 🔥
+  const myVoices = {
+    "Locutores Comerciales": [
+      { id: "d8825869c3ca4fd4ae08ee5fd460a98e", name: "Anunciador Político" },
+      { id: "cd85a7b00f984147a594713d16c711a2", name: "Narrador Político" },
+      { id: "ecdb5ee920b745d69893db07702e1121", name: "Vendedor 1" },
+      { id: "3a0a149a73404ee49bef125dfff2a9c2", name: "Vendedor 2" },
+      { id: "3c36518138f44abca0006ac477aae182", name: "Vendedor 3" },
+      { id: "a3e971a0b8e548c9928308e2ff14af29", name: "Vendedor 4" },
+      { id: "d97cd3bf9ac547d8a90a910dd416e669", name: "Voz Publicidad Chicha" },
+      { id: "35199d5438854f5d9157c500479ab684", name: "Narrador" }
+    ],
+    "Animación y Eventos": [
+      { id: "bf7ea28b5f734161bb8eec37b23b1fec", name: "Voz Evento" },
+      { id: "abeab4f9b0594d6d85ba2c7c0f6d6051", name: "Voz Mujer Evento Social" },
+      { id: "12eaf6ffa4ae469d9431f4e43229a3e3", name: "Voz Mujer Evento Social 2" },
+      { id: "3119936075df42628af7d6dcb17f4493", name: "Animador" },
+      { id: "c079a8df558c43eb997b70368fdb18fb", name: "Animador Bella Luz" }
+    ],
+    "DJs y Radio": [
+      { id: "5110c264835042cfb1d8563ab60e912c", name: "DJ 1" },
+      { id: "be88245c013f44a8a6dbb35ed71c5a1f", name: "DJ 2" },
+      { id: "fdc7ac94b9a94f52911520f9131fe3be", name: "DJ 3" },
+      { id: "dff5958763e541ee9288b8bbed01064a", name: "DJ 4" },
+      { id: "95d0e4a9841e423b90c01f4c51c3cb66", name: "DJ 5" },
+      { id: "0691ad69e4bb49e6803b4fb14aed628d", name: "DJ 6" },
+      { id: "b78300e744cb455eb4f6b2ac95e97e22", name: "DJ 7" },
+      { id: "94ec15a8b97d4e66948be32780c8314d", name: "Spot Dj Varón" },
+      { id: "5d201ef6c3d844fb84956745b311ab9a", name: "Spot Radio Mujer" },
+      { id: "2153dc77d28e4de986ecb87489695723", name: "Spot Radio Varón" },
+      { id: "29e182e38d6742d6a5b2ee21901c9fb3", name: "Spot Radio Varón 2" },
+      { id: "14196dde8a13465e9b7b8f869fc3c21d", name: "Spot Radio Mujer 2" },
+      { id: "bc55e1d5054142e9845be113c2877615", name: "Spot Radio Varón - Cuña" }
+    ],
+    "Voces Femeninas Específicas": [
+      { id: "bc93fd919a214c2eae9fe16492a47489", name: "Mujer Paisa" },
+      { id: "e296306da5d449999f6e35c2b9f60aea", name: "Mujer Colombiana" },
+      { id: "852cb30e8c92488e94a6125573403ff3", name: "Spot Mujer" },
+      { id: "3468323155ba4c94a1ebc52f6e8947da", name: "Spot Mujer 2" }
+    ],
+    "Voces Infantiles": [
+      { id: "e79d7a271fa94788a3f09abb4f4aa4ab", name: "Bebé Mujer 1" },
+      { id: "5af3243c2af74a0d8cddae419a5efa42", name: "Bebé" },
+      { id: "86f205d0942e4fb59f15a08a07d6d018", name: "Bebé Hombre" }
+    ]
+  };
 
   const loginModal = document.getElementById('login-modal');
   const btnLogin = document.getElementById('btn-login');
