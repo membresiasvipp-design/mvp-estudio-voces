@@ -77,10 +77,6 @@ select:focus, textarea:focus, input:focus {
 }
 textarea { resize: none; flex: 1; min-height: 120px; line-height: 1.5; }
 
-/* Estilizando las Categorías del Menú de Voces (Optgroups) */
-optgroup { color: #818cf8; font-weight: bold; background: #0f0f11; font-style: normal; }
-option { color: #e2e8f0; background: #18181b; padding: 10px; font-weight: normal; }
-
 /* Radio Buttons y Cajas de Fondo Musical */
 input[type="radio"] { width: 18px; height: 18px; margin: 0; cursor: pointer; accent-color: var(--green-solid); }
 .radio-group { 
