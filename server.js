@@ -13,22 +13,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 2. Crear carpeta temporal para los audios
 const tempDir = path.join(__dirname, 'temp');
 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-
-// 3. Permitir acceso a la carpeta temporal
 app.use('/temp', express.static(tempDir));
 
-let currentKeys = { FishAudio: [], Gemini: [] };
+// 🔥 LA URL DE TU BASE DE DATOS AHORA VIVE AQUÍ (100% INVISIBLE AL USUARIO) 🔥
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyq3giovpe2cjbUvGlhJPXKVXh5bIoYnlFeiNxxfXDMhm_4JE_-FSYsIppXFGf9aNEyWA/exec';
+
+// 🔥 SISTEMA DE SEGURIDAD EN MEMORIA (BÓVEDA) 🔥
+let activeSessions = {}; // Guardará: token -> { username, credits }
+let systemKeys = { FishAudio: [], Gemini: [] };
 let activeKeyIndex = { FishAudio: 0, Gemini: 0 };
 
-app.post('/api/set-keys', (req, res) => {
-  currentKeys = req.body;
-  activeKeyIndex = { FishAudio: 0, Gemini: 0 };
-  console.log("✅ Claves API cargadas en el servidor.");
-  res.json({ success: true });
-});
-
 async function fetchWithRotation(serviceName, requestFunction) {
-  let keys = currentKeys[serviceName];
+  let keys = systemKeys[serviceName];
   if (!keys || keys.length === 0) throw new Error(`No hay claves configuradas para ${serviceName}`);
 
   let attempts = 0;
@@ -40,37 +36,64 @@ async function fetchWithRotation(serviceName, requestFunction) {
       let response = await requestFunction(currentKey);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`\n❌ [RECHAZO DE ${serviceName}]:`, errorText, "\n");
-        
-        if (response.status === 429) {
-          await new Promise(resolve => setTimeout(resolve, 60000)); 
+        if (response.status === 429 || response.status === 401 || response.status === 404) {
           activeKeyIndex[serviceName] = (activeKeyIndex[serviceName] + 1) % keys.length;
           attempts++;
           continue;
         }
-
-        if (response.status === 401 || response.status === 404) {
-          activeKeyIndex[serviceName] = (activeKeyIndex[serviceName] + 1) % keys.length;
-          attempts++;
-          continue;
-        }
-
         throw new Error(`Error HTTP: ${response.status}`);
       }
       return response;
     } catch (error) {
-      console.error(`Error de intento en ${serviceName}:`, error.message);
       attempts++;
       activeKeyIndex[serviceName] = (activeKeyIndex[serviceName] + 1) % keys.length;
     }
   }
-  
   throw new Error(`Todas las claves de ${serviceName} fallaron o están saturadas.`);
 }
 
+// 🛡️ RUTA 1: LOGIN SEGURO (El servidor habla con Google, no el usuario)
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: "login", username, password })
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      // Guardamos las claves maestras en el servidor (NUNCA SE ENVÍAN AL NAVEGADOR)
+      if (data.keys) systemKeys = data.keys;
+
+      // Creamos un Pase VIP (Token) indescifrable
+      const token = "tkn_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
+
+      // Guardamos la sesión en la bóveda
+      activeSessions[token] = {
+        username: username,
+        credits: data.credits
+      };
+
+      // Solo devolvemos el token y los créditos visuales
+      res.json({ success: true, token: token, credits: data.credits });
+    } else {
+      res.json({ success: false, message: data.message });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error conectando a la base de datos." });
+  }
+});
+
+// 🛡️ RUTA 2: GENERAR GUION (Requiere Pase VIP)
 app.post('/api/generate-script', async (req, res) => {
-  const { promptData, voiceName, sector } = req.body;
+  const { promptData, voiceName, sector, token } = req.body;
+
+  // BARRERA: Si no tiene token válido, lo bloqueamos
+  if (!token || !activeSessions[token]) {
+    return res.status(401).json({ error: "Acceso denegado. Bloqueo de seguridad activado." });
+  }
+
   try {
     const response = await fetchWithRotation("Gemini", async (apiKey) => {
       let sectorInstruction = "";
@@ -84,7 +107,6 @@ app.post('/api/generate-script', async (req, res) => {
         default: sectorInstruction = "Tono: persuasivo, profesional y muy dinámico.";
       }
 
-      // 🔥 AQUÍ ESTÁ EL CAMBIO PARA LOS PROMPTS NATURALES 🔥
       const systemPrompt = `Eres un locutor y creativo publicitario experto.
 Tu trabajo es redactar un guion comercial EXTENSO, potente y muy descriptivo basado en estas ideas: "${promptData}".
 INSTRUCCIONES CRÍTICAS:
@@ -108,22 +130,31 @@ INSTRUCCIONES CRÍTICAS:
     const data = await response.json();
     res.json({ text: data.candidates[0].content.parts[0].text });
   } catch (error) {
-    console.error("Error interno oculto (Guion):", error.message);
-    res.status(500).json({ error: "El asistente de texto inteligente (Gemini) está procesando demasiadas peticiones. Intenta de nuevo." });
+    res.status(500).json({ error: "El asistente de texto (Gemini) está saturado. Intenta de nuevo." });
   }
 });
 
+// 🛡️ RUTA 3: GENERAR AUDIO Y COBRAR CRÉDITOS (Servidor controla los gastos)
 app.post('/api/generate-audio', async (req, res) => {
-  const { text, voiceId } = req.body;
+  const { text, voiceId, token } = req.body;
+  const COST_VOICE = 3;
+
+  // BARRERA 1: Validar sesión
+  if (!token || !activeSessions[token]) {
+    return res.status(401).json({ error: "Acceso denegado." });
+  }
+
+  // BARRERA 2: Validar saldo directamente en la bóveda del servidor
+  let userSession = activeSessions[token];
+  if (userSession.credits < COST_VOICE) {
+    return res.status(403).json({ error: "Créditos insuficientes en tu cuenta." });
+  }
+
   try {
     const response = await fetchWithRotation("FishAudio", async (apiKey) => {
       return await fetch("https://api.fish.audio/v1/tts", {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'model': 's2.1-pro-free' 
-        },
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'model': 's2.1-pro-free' },
         body: JSON.stringify({ text: text, reference_id: voiceId, format: "mp3" })
       });
     });
@@ -132,18 +163,46 @@ app.post('/api/generate-audio', async (req, res) => {
     const buffer = Buffer.from(arrayBuffer);
     const fileName = `voz_${Date.now()}.mp3`;
     const filePath = path.join(tempDir, fileName);
-    
     fs.writeFileSync(filePath, buffer);
-    res.json({ url: `/temp/${fileName}` }); 
+
+    // 💰 COBRO SEGURO: Descontamos en la memoria del servidor
+    userSession.credits -= COST_VOICE;
+
+    // Avisamos a Google Sheets en segundo plano para que guarde el historial
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: "deduct", username: userSession.username, cost: COST_VOICE })
+    }).catch(e => console.log("Error al sincronizar con Sheets"));
+
+    // Le devolvemos el audio y el nuevo saldo oficial al usuario
+    res.json({ url: `/temp/${fileName}`, remainingCredits: userSession.credits }); 
 
   } catch (error) {
-    console.error("Error interno oculto (Voces):", error.message);
-    res.status(500).json({ error: "El motor de voces profesionales está saturado temporalmente. Por favor, intenta de nuevo en unos segundos." });
+    res.status(500).json({ error: "El motor de voces profesionales está saturado. Intenta de nuevo." });
   }
 });
 
-// 🔥 CONFIGURACIÓN DE PUERTO PARA LA NUBE 🔥
+// 🛡️ RUTA 4: COBRAR MÚSICA DE FONDO (Para evitar hacks de mezcla)
+app.post('/api/deduct-music', (req, res) => {
+  const { token, cost } = req.body;
+  
+  if (!token || !activeSessions[token]) return res.status(401).json({ error: "Acceso denegado." });
+  let userSession = activeSessions[token];
+  if (userSession.credits < cost) return res.status(403).json({ error: "Créditos insuficientes." });
+
+  // Cobramos localmente
+  userSession.credits -= cost;
+
+  // Sincronizamos con Sheets
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: "deduct", username: userSession.username, cost: cost })
+  }).catch(e => console.log("Error al sincronizar música con Sheets"));
+
+  res.json({ success: true, remainingCredits: userSession.credits });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 SERVIDOR EN LA NUBE ACTIVO EN PUERTO ${PORT}\n`);
+  console.log(`\n🚀 SERVIDOR SEGURO ACTIVO EN PUERTO ${PORT}\n`);
 });
