@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentCredits = 0;
   const MAX_CHARS = 600;
   const COST_MUSIC = 5;
+  const COST_SCRIPT = 1; // 🔥 COSTO POR GUION 🔥
+  
   let currentPreviewAudio = new Audio();
   let generatedAcapellaUrl = null; 
 
@@ -196,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLogin.textContent = "Validando..."; btnLogin.disabled = true; errorMsg.classList.add('hidden');
 
     try {
-      // Llamamos a nuestra propia bóveda (server.js)
       const response = await fetch('/api/login', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
@@ -212,6 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
         creditCounter.textContent = currentCredits; displayUser.textContent = `👤 ${user}`;
         document.getElementById('login-modal').classList.add('hidden'); 
         disclaimerModal.classList.remove('hidden'); 
+        
+        // 🔥 CANDADO VISUAL: Revela el estudio SOLO si entró legalmente 🔥
+        const mainStudio = document.getElementById('main-studio');
+        if (mainStudio) mainStudio.style.display = 'flex';
+
       } else {
         errorMsg.textContent = data.message; errorMsg.classList.remove('hidden');
       }
@@ -237,9 +243,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // 🔥 ESCRITURA CON COBRO DE CRÉDITO 🔥
   btnWriteScript.addEventListener('click', async () => {
     const promptData = document.getElementById('prompt-data').value.trim();
     if (!promptData) return alert("Ingresa datos para el anuncio.");
+    
+    if (currentCredits < COST_SCRIPT) return alert("No tienes créditos suficientes para redactar con IA.");
+
     const selectedVoiceText = voiceSelect.options[voiceSelect.selectedIndex].text.replace('👉', '').trim();
     const selectedSector = sectorSelect.value;
 
@@ -248,17 +258,21 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch('/api/generate-script', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        // 🔥 ENVIAMOS EL PASE VIP 🔥
         body: JSON.stringify({ promptData, voiceName: selectedVoiceText, sector: selectedSector, token: sessionToken })
       });
       const data = await res.json();
       if(data.error) throw new Error(data.error);
       
+      // Actualizar créditos en pantalla
+      currentCredits = data.remainingCredits;
+      creditCounter.textContent = currentCredits;
+
       finalScript.value = data.text; finalScript.dispatchEvent(new Event('input')); 
     } catch (error) {
-      alert(`Error generando guion: ${error.message}`);
+      alert(`⚠️ Error generando guion: ${error.message}`);
     }
-    btnWriteScript.textContent = "✨ ESCRIBIR GUION PROFESIONAL"; btnWriteScript.disabled = false;
+    btnWriteScript.innerHTML = `✨ ESCRIBIR GUION PROFESIONAL (Costo: ${COST_SCRIPT} Crédito)`; 
+    btnWriteScript.disabled = false;
   });
 
   function audioBufferToWavUrl(buffer) {
@@ -297,13 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch('/api/generate-audio', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-        // 🔥 ENVIAMOS EL PASE VIP 🔥
         body: JSON.stringify({ text, voiceId, token: sessionToken })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      // El servidor nos devuelve los créditos actualizados
       currentCredits = data.remainingCredits; 
       creditCounter.textContent = currentCredits;
       
@@ -372,7 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnMixAudio.textContent = "🎛️ PROCESANDO MEZCLA FINAL..."; btnMixAudio.disabled = true;
 
     try {
-      // Si la música tiene costo, que el servidor lo cobre PRIMERO de forma segura
       if (musicCost > 0) {
         const costRes = await fetch('/api/deduct-music', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
