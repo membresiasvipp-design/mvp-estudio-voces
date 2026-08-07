@@ -84,15 +84,18 @@ app.post('/api/generate-script', async (req, res) => {
         default: sectorInstruction = "Tono: persuasivo, profesional y muy dinámico.";
       }
 
+      // 🔥 AQUÍ ESTÁ EL CAMBIO PARA LOS PROMPTS NATURALES 🔥
       const systemPrompt = `Eres un locutor y creativo publicitario experto.
 Tu trabajo es redactar un guion comercial EXTENSO, potente y muy descriptivo basado en estas ideas: "${promptData}".
 INSTRUCCIONES CRÍTICAS:
 1. ${sectorInstruction}
 2. Voz asignada: "${voiceName}".
 3. EXPANSIÓN OBLIGATORIA: INVENTA frases de relleno persuasivo, adjetivos y beneficios. ESTÁ PROHIBIDO HACER GUIONES CORTOS.
-4. TAMAÑO EXACTO: El guion DEBE tener entre 60 y 80 palabras.
-5. Sé sumamente expresivo usando exclamaciones (¡!) y pausas dramáticas (...).
-6. ENTREGABLE: Devuelve ÚNICAMENTE el guion exacto a grabar. Sin comillas ni explicaciones extra.`;
+4. TAMAÑO EXACTO: El guion DEBE tener entre 80 y 100 palabras.
+5. ETIQUETAS DE EMOCIÓN (SÚPER OBLIGATORIO): Para que la voz suene humana y natural, DEBES incluir etiquetas de acción entre corchetes a lo largo del texto.
+   Usa estrictamente estas etiquetas donde corresponda: [excited], [emphasis], [chuckle], [short pause], [long pause], [sigh].
+   EJEMPLO DE FORMATO ESPERADO: "[excited] ¡Señoras y señores! [short pause] ¡La fiesta ya comenzó! [emphasis] ¡Quiero ver esas manos arriba bailando! [chuckle] ¡Aquí nadie se queda sentado!"
+6. ENTREGABLE: Devuelve ÚNICAMENTE el guion exacto a grabar incluyendo los corchetes. Sin comillas ni explicaciones extra.`;
       
       const targetModel = 'models/gemini-flash-latest';
       return await fetch(`https://generativelanguage.googleapis.com/v1beta/${targetModel}:generateContent?key=${apiKey}`, {
@@ -105,7 +108,6 @@ INSTRUCCIONES CRÍTICAS:
     const data = await response.json();
     res.json({ text: data.candidates[0].content.parts[0].text });
   } catch (error) {
-    // 🔥 CAMBIO AQUÍ: Mensaje personalizado para el cliente (Gemini)
     console.error("Error interno oculto (Guion):", error.message);
     res.status(500).json({ error: "El asistente de texto inteligente (Gemini) está procesando demasiadas peticiones. Intenta de nuevo." });
   }
@@ -135,7 +137,6 @@ app.post('/api/generate-audio', async (req, res) => {
     res.json({ url: `/temp/${fileName}` }); 
 
   } catch (error) {
-    // 🔥 CAMBIO AQUÍ: Mensaje Marca Blanca (Oculta a FishAudio)
     console.error("Error interno oculto (Voces):", error.message);
     res.status(500).json({ error: "El motor de voces profesionales está saturado temporalmente. Por favor, intenta de nuevo en unos segundos." });
   }
